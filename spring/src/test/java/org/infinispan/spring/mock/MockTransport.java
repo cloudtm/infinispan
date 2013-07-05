@@ -90,7 +90,7 @@ public final class MockTransport implements Transport {
    }
 
    @Override
-   public void checkTotalOrderSupported(boolean anycast) {
+   public void checkTotalOrderSupported() {
    }
 
    @Override

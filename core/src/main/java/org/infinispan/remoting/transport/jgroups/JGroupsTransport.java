@@ -509,12 +509,12 @@ public class JGroupsTransport extends AbstractTransport implements MembershipLis
       if (broadcast || (totalOrder && !anycast)) {
          rsps = dispatcher.broadcastRemoteCommands(rpcCommand, toJGroupsMode(mode), timeout,
                                                    usePriorityQueue, toJGroupsFilter(responseFilter),
-                                                   asyncMarshalling, ignoreLeavers, totalOrder, anycast);
+                                                   asyncMarshalling, ignoreLeavers, totalOrder);
       } else if (totalOrder && anycast) {
          rsps = dispatcher.invokeRemoteCommands(jgAddressList, rpcCommand, toJGroupsMode(mode), timeout,
                                                 usePriorityQueue, toJGroupsFilter(responseFilter),
-                                                asyncMarshalling, ignoreLeavers, totalOrder, anycast);
-      } else {         
+                                                asyncMarshalling, ignoreLeavers, totalOrder);
+      } else {
          if (jgAddressList == null || !jgAddressList.isEmpty()) {
             boolean singleRecipient = !ignoreLeavers && jgAddressList != null && jgAddressList.size() == 1;
             boolean skipRpc = false;
@@ -533,7 +533,7 @@ public class JGroupsTransport extends AbstractTransport implements MembershipLis
                } else {
                   rsps = dispatcher.invokeRemoteCommands(jgAddressList, rpcCommand, toJGroupsMode(mode), timeout,
                                                          usePriorityQueue, toJGroupsFilter(responseFilter),
-                                                         asyncMarshalling, ignoreLeavers, totalOrder, anycast);
+                                                         asyncMarshalling, ignoreLeavers, totalOrder);
                }
             }
          }
@@ -743,8 +743,9 @@ public class JGroupsTransport extends AbstractTransport implements MembershipLis
    }
 
    @Override
-   public final void checkTotalOrderSupported(boolean anycast) {
-      if (anycast && channel.getProtocolStack().findProtocol(TOA.class) == null) {
+   public final void checkTotalOrderSupported() {
+      //For replicated and distributed tx caches, we use TOA as total order protocol.
+      if (channel.getProtocolStack().findProtocol(TOA.class) == null) {
          throw new ConfigurationException("In order to support total order based transaction, the TOA protocol " +
                                                 "must be present in the JGroups's config.");
       }
