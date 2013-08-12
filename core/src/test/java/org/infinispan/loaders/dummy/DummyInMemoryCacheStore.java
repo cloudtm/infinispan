@@ -50,9 +50,6 @@ public class DummyInMemoryCacheStore extends AbstractCacheStore {
    }
 
    private void record(String method) {
-      if (log.isTraceEnabled()) {
-         log.tracef("Invoked: %s", method);
-      }
       stats.get(method).incrementAndGet();
    }
 
@@ -159,17 +156,11 @@ public class DummyInMemoryCacheStore extends AbstractCacheStore {
    @Override
    public InternalCacheEntry load(Object key) {
       record("load");
-      if (log.isTraceEnabled()) {
-         log.tracef("load(%s)", key);
-      }
+      if (debug) log.debugf("Load %s in dummy map store@%s", key, Util.hexIdHashCode(store));
       if (key == null) return null;
-      if (log.isTraceEnabled()) {
-         log.tracef("load(%s), exists? %s", key, store.containsKey(key));
-      }
+      if (debug) log.debugf("Store %s in dummy map store@%s. exists? %s", key, Util.hexIdHashCode(store), store.containsKey(key));
       InternalCacheEntry se = deserializeEntry(store.get(key));
-      if (log.isTraceEnabled()) {
-         log.tracef("load(%s) == %s", key, se);
-      }
+      if (debug) log.debugf("Load %s in dummy map store@%s == %s", key, Util.hexIdHashCode(store), se);
       if (se == null) return null;
       if (se.isExpired(System.currentTimeMillis())) {
          log.debugf("Key %s exists, but has expired.  Entry is %s", key, se);
@@ -185,8 +176,10 @@ public class DummyInMemoryCacheStore extends AbstractCacheStore {
       record("loadAll");
       Set<InternalCacheEntry> s = new HashSet<InternalCacheEntry>();
       final long currentTimeMillis = System.currentTimeMillis();
+      if (debug) log.debugf("LoadAll in dummy map store@%s", Util.hexIdHashCode(store));
       for (Iterator<byte[]> i = store.values().iterator(); i.hasNext();) {
          InternalCacheEntry se = deserializeEntry(i.next());
+         if (debug) log.debugf("LoadAll in dummy map store@%s == %s", Util.hexIdHashCode(store), se);
          if (se.isExpired(currentTimeMillis)) {
             log.debugf("Key %s exists, but has expired.  Entry is %s", se.getKey(), se);
             i.remove();
