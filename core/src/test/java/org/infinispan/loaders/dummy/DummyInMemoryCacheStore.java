@@ -50,6 +50,9 @@ public class DummyInMemoryCacheStore extends AbstractCacheStore {
    }
 
    private void record(String method) {
+      if (log.isTraceEnabled()) {
+         log.tracef("Invoked: %s", method);
+      }
       stats.get(method).incrementAndGet();
    }
 
@@ -156,8 +159,17 @@ public class DummyInMemoryCacheStore extends AbstractCacheStore {
    @Override
    public InternalCacheEntry load(Object key) {
       record("load");
+      if (log.isTraceEnabled()) {
+         log.tracef("load(%s)", key);
+      }
       if (key == null) return null;
+      if (log.isTraceEnabled()) {
+         log.tracef("load(%s), exists? %s", key, store.containsKey(key));
+      }
       InternalCacheEntry se = deserializeEntry(store.get(key));
+      if (log.isTraceEnabled()) {
+         log.tracef("load(%s) == %s", key, se);
+      }
       if (se == null) return null;
       if (se.isExpired(System.currentTimeMillis())) {
          log.debugf("Key %s exists, but has expired.  Entry is %s", key, se);
